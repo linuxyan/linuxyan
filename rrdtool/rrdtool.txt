@@ -1,0 +1,65 @@
+﻿linux下记录流量最大数是4294967295，当前流量大于此值就会发生溢出，数值回退为0，再继续增长。
+所以在遇到此类情况时，应使用公式：4294967295-前一个数值+后一个数值，得出从前一个时间点到后一个时间点的实际流量。
+
+http://blog.liuts.com/post/215/
+
+
+创建rrd库文件命令
+rrdtool create eth1.rrd \
+--start $(date -d "1 year ago" +%s) \
+--step 300 \
+DS:eth0_in:COUNTER:600:0:U \
+DS:eth0_out:COUNTER:600:0:U \
+RRA:AVERAGE:0.5:1:600 \
+RRA:AVERAGE:0.5:6:700 \
+RRA:AVERAGE:0.5:24:775 \
+RRA:AVERAGE:0.5:288:797 \
+RRA:MAX:0.5:1:600 \
+RRA:MAX:0.5:6:700 \
+RRA:MAX:0.5:24:775 \
+RRA:MAX:0.5:444:797 \
+RRA:MIN:0.5:1:600 \
+RRA:MIN:0.5:6:700 \
+RRA:MIN:0.5:24:775 \
+RRA:MIN:0.5:444:797
+
+
+画图：
+rrdtool graph $image_path/eth1.png -w 700 -h 200 \
+-n TITLE:11:"$font_path" \
+-n UNIT:8:"$font_path" \
+-n LEGEND:8:"$font_path" \
+-c SHADEA#DDDDDD \
+-c SHADEB#808080 \
+-c FRAME#006600 \
+-c FONT#006699 \
+-c ARROW#FF0000 \
+-c AXIS#000000 \
+-c BACK#FFFFFF \
+-Y -X 6 \
+-t "Pst Server(203.195.186.17) Trffic eth0" -v "bits per second 流量" \
+--start -1d --end now \
+--x-grid MINUTE:12:HOUR:1:HOUR:1:0:'%H' \
+DEF:value1=$rrd_path:eth0_in:AVERAGE \
+DEF:value2=$rrd_path:eth0_out:AVERAGE \
+CDEF:eth0_in=value1,8,* \
+CDEF:eth0_out=value2,8,* \
+COMMENT:" \n" \
+AREA:eth0_in#00ff00:In \
+GPRINT:eth0_in:LAST:" Current\:%8.2lf %s"  \
+GPRINT:eth0_in:AVERAGE:"Average\:%8.2lf %s"  \
+GPRINT:eth0_in:MAX:"MAX\:%8.2lf %s"  \
+GPRINT:eth0_in:MIN:"MIN\:%8.2lf %s"  \
+COMMENT:" \n" \
+LINE2:eth0_out#4433ff:Out \
+GPRINT:eth0_out:LAST:"Current\:%8.2lf %s"  \
+GPRINT:eth0_out:AVERAGE:"Average\:%8.2lf %s"  \
+GPRINT:eth0_out:MAX:"MAX\:%8.2lf %s"  \
+GPRINT:eth0_out:MIN:"Min\:%8.2lf %s"  \
+COMMENT:" \n" \
+COMMENT:"─────────────────────────────────────────────\n" \
+COMMENT:"\t\t\t\t\t\t\t\t\t\t\t\t\t\t  Last time\:$(date '+%Y-%m-%d %H\:%M')\n" -Y \
+COMMENT:"\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t Aodian Soft Ops\n"
+
+
+

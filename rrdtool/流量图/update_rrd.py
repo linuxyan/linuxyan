@@ -4,20 +4,19 @@ import rrdtool
 from rrdtool import update as rrd_update
 import os, netsnmp, time
 
-Host='203.195.186.17'
-eth_in_oid = netsnmp.Varbind('ifInOctets.2')
-eth_out_oid = netsnmp.Varbind('ifOutOctets.2')
-image_path = '/var/www/html/image/'+Host+'/'
-rrd_path = '/var/www/html/rrd/'+Host+'_trffic.rrd'
+rrd_dir = '/var/www/html/rrd/'
+img_dir = '/var/www/html/image'
 
+if not os.path.exists(rrd_dir):
+    os.makedirs(rrd_dir)
+if not os.path.exists(img_dir):
+    os.makedirs(img_dir)
 
-if not os.path.isdir(image_path):
-    os.makedirs(image_path)
 
 '''
 create rrd file
 '''
-def create_rrd():
+def create_rrd(rrd_path):
     ret = rrdtool.create(rrd_path,"--step","300","--start","0",
     "DS:eth_in:COUNTER:600:0:U",
     "DS:eth_out:COUNTER:600:0:U",
@@ -42,20 +41,20 @@ def create_rrd():
 '''
 update rrd data
 '''
-def update_rrd():
-    eth_in_trffic = netsnmp.snmpget(eth_in_oid, Version=2, DestHost=Host, Community='aodiansvr')
-    eth_out_trffic = netsnmp.snmpget(eth_out_oid, Version=2, DestHost=Host, Community='aodiansvr')
+def update_rrd(Host, eth_in_oid, eth_out_oid, rrd_path, auth):
+    eth_in_trffic = netsnmp.snmpget(eth_in_oid, Version=2, DestHost=Host, Community=auth)
+    eth_out_trffic = netsnmp.snmpget(eth_out_oid, Version=2, DestHost=Host, Community=auth)
     ret = rrd_update(rrd_path,'N:%s:%s' %(eth_in_trffic[0], eth_out_trffic[0]))
-    print "update %s  N:%s:%s" %(rrd_path,eth_in_trffic[0], eth_out_trffic[0])
+    if not ret:
+        print rrdtool.error()
+    print "update %s  N:%s:%s" %(rrd_path, eth_in_trffic[0], eth_out_trffic[0])
 
 
 '''
 update image data
 '''
-def update_png():
-        image_name = image_path+Host+'_trffic'+'.png'
-        print image_name
-        ret = rrdtool.graph(image_name, '-w 700', '-h 200',
+def update_png(image_path, rrd_path, Host):
+        ret = rrdtool.graph(image_path, '-w 700', '-h 200',
                       '-t Server(%s) 流量' %(Host),
                       '--color', 'BACK#FFFFFF',
                       '--color', 'SHADEA#DDDDDD',
@@ -89,8 +88,32 @@ def update_png():
                       'COMMENT:─────────────────────────────────────────────\n',
                       'COMMENT: \\n',
                       "COMMENT:XXX运维部开发与维护\t\t\t最后更新 \:%s\n"  %(time.strftime("%Y-%m-%d %H\:%M\:%S", time.localtime())))
-#create_rrd()
-while True:
-    update_rrd()
-    update_png()
-    time.sleep(300)
+        if not ret:
+            print rrdtool.error()
+
+
+
+def main():
+    for line in open('hosts.conf'):
+        Host = line.split(' ')[0]
+        eth = int(line.split(' ')[1][-1])+2
+        if line.split(' ')[2]:
+            auth = line.split(' ')[2]
+        else:
+            auth = 'public'
+
+        image_path = img_dir+Host+'_trffic'+'.png'
+        rrd_path = rrd_dir+Host+'_trffic.rrd'
+        if not os.path.exists(rrd_path):
+            create_rrd(rrd_path)
+
+        eth_in_oid = netsnmp.Varbind('ifInOctets.%s' %(eth))
+        eth_out_oid = netsnmp.Varbind('ifOutOctets.%s' %(eth))
+        update_rrd(Host, eth_in_oid, eth_out_oid, rrd_path, auth)
+        update_png(image_path, rrd_path, Host)
+
+
+if __name__ == '__main__':
+    while True:
+        main()
+        time.sleep(300)

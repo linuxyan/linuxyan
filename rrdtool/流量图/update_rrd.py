@@ -4,13 +4,12 @@ import rrdtool
 from rrdtool import update as rrd_update
 import os, netsnmp, time
 
-Host='xx.xx.xx.xx'
+Host='203.195.186.17'
 eth_in_oid = netsnmp.Varbind('ifInOctets.2')
 eth_out_oid = netsnmp.Varbind('ifOutOctets.2')
 image_path = '/var/www/html/image/'+Host+'/'
 rrd_path = '/var/www/html/rrd/'+Host+'_trffic.rrd'
-ISOTIMEFORMAT='%Y-%m-%d %X'
-datetime = time.strftime(ISOTIMEFORMAT, time.localtime())
+
 
 if not os.path.isdir(image_path):
     os.makedirs(image_path)
@@ -53,7 +52,6 @@ def update_rrd():
 '''
 update image data
 '''
-date = time.strftime('%Y-%m-%d %H:%M:%S')
 def update_png():
         image_name = image_path+Host+'_trffic'+'.png'
         print image_name

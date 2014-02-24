@@ -5,7 +5,7 @@ from rrdtool import update as rrd_update
 import os, netsnmp, time
 
 rrd_dir = '/var/www/html/rrd/'
-img_dir = '/var/www/html/image'
+img_dir = '/var/www/html/image/'
 
 if not os.path.exists(rrd_dir):
     os.makedirs(rrd_dir)

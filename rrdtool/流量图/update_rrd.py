@@ -5,7 +5,7 @@ from rrdtool import update as rrd_update
 import os, netsnmp, time
 
 rrd_dir = '/var/www/html/rrd/'
-img_dir = '/var/www/html/image'
+img_dir = '/var/www/html/image/'
 
 if not os.path.exists(rrd_dir):
     os.makedirs(rrd_dir)
@@ -13,9 +13,7 @@ if not os.path.exists(img_dir):
     os.makedirs(img_dir)
 
 
-'''
-create rrd file
-'''
+'''create rrd file'''
 def create_rrd(rrd_path):
     ret = rrdtool.create(rrd_path,"--step","300","--start","0",
     "DS:eth_in:COUNTER:600:0:U",
@@ -42,12 +40,12 @@ def create_rrd(rrd_path):
 update rrd data
 '''
 def update_rrd(Host, eth_in_oid, eth_out_oid, rrd_path, auth):
-    eth_in_trffic = netsnmp.snmpget(eth_in_oid, Version=2, DestHost=Host, Community=auth)
-    eth_out_trffic = netsnmp.snmpget(eth_out_oid, Version=2, DestHost=Host, Community=auth)
-    ret = rrd_update(rrd_path,'N:%s:%s' %(eth_in_trffic[0], eth_out_trffic[0]))
+    eth_in_trffic = netsnmp.snmpget(eth_in_oid, Version=2, DestHost=Host, Community=auth)[0]
+    eth_out_trffic = netsnmp.snmpget(eth_out_oid, Version=2, DestHost=Host, Community=auth)[0]
+    ret = rrd_update(rrd_path, 'N:%s:%s' %(eth_in_trffic, eth_out_trffic))
     if not ret:
         print rrdtool.error()
-    print "update %s  N:%s:%s" %(rrd_path, eth_in_trffic[0], eth_out_trffic[0])
+    print "update %s  N:%s:%s" %(rrd_path, eth_in_trffic, eth_out_trffic)
 
 
 '''
@@ -95,10 +93,10 @@ def update_png(image_path, rrd_path, Host):
 
 def main():
     for line in open('hosts.conf'):
-        Host = line.split(' ')[0]
-        eth = int(line.split(' ')[1][-1])+2
-        if line.split(' ')[2]:
-            auth = line.split(' ')[2]
+        Host = line.split()[0]
+        eth = int(line.split()[1][-1])+2
+        if line.split()[2]:
+            auth = line.split()[2]
         else:
             auth = 'public'
 

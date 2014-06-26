@@ -8,7 +8,7 @@ import sys, argparse
 
 class zabbix_api:
     def __init__(self):
-        self.url = 'http://115.236.100.80/zabbix/api_jsonrpc.php'
+        self.url = 'http://zabbix_ip/api_jsonrpc.php' #zabbix url
         self.header = {"Content-Type": "application/json"}
 
     def user_login(self):
@@ -16,8 +16,8 @@ class zabbix_api:
             "jsonrpc": "2.0",
             "method": "user.login",
             "params": {
-                "user": "admin",
-                "password": "sysionup360"
+                "user": "username", #username
+                "password": "password" #password
             },
             "id": 0
         })

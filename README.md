@@ -15,4 +15,13 @@
 
     git clone git@github.com:linuxyan/linuxyan.git
 
+ssh-keygen -t rsa -C "your_email@youremail.com"
+ssh -T git@github.com
+git config --global user.name "your name"
+git config --global user.email "your_email@youremail.com"
+git clone git@github.com:linuxyan/linuxyan.git
+git add 
+git commit -m
+git push origin master
+
   [1]: https://github.com/linuxyan/linuxyan

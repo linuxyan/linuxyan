@@ -1,12 +1,20 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-  
 import sys
 import paramiko
 
-id_rsa_pub = '/home/yan/.ssh/id_rsa.pub'
+#注意，此处不能用～来代替家目录
+home_dir = '/home/yan'
+id_rsa_pub = '%s/.ssh/id_rsa.pub' %home_dir
 
 if not  id_rsa_pub:
     print 'id_rsa.pub Does not exist!'
     sys.exit(0)
+
+file_object = open('%s/.ssh/config' %home_dir ,'w')
+file_object.write('StrictHostKeyChecking no\n')
+file_object.write('UserKnownHostsFile /dev/null')
+file_object.close()
 
 def up_key(host,port,user,passwd):
     try:

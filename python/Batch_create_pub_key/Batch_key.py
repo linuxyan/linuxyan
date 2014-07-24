@@ -43,12 +43,11 @@ def up_key(host,port,user,passwd):
         except:
             pass
 
+def run():
+    for line in open('host.list'):
+        line = line.strip('\n')
+        host,port,user,passwd = line.split(':')
+        up_key(host, int(port), user, passwd)
 
-for line in open('host.list'):
-    line = line.strip('\n')
-    host = line.split(':')[0]
-    port = line.split(':')[1]
-    user = line.split(':')[2]
-    passwd = line.split(':')[3]
-    up_key(host, int(port), user, passwd)
-
+if __name__ == '__main__':
+    run()

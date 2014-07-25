@@ -4,11 +4,17 @@ Batch create pub key
 require
 ===
 python version > 2.5
+
 model:
+
 paramiko
 
 ===
-easy_install paramiko  or  pip install paramiko
+easy_install paramiko  
+
+or  
+
+pip install paramiko
 
 
 批量创建auth key
@@ -19,7 +25,9 @@ host.list
 ip:port:user:passwd
 
 ps:默认id_rsa.pub创建在~/.ssh/id_rsa.pub
+
 修改Batch_key.py
+
 	home_dir = '/home/yan'
 	修改为本地家目录
 
